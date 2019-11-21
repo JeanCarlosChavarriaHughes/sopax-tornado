@@ -1,5 +1,9 @@
 tornado-boilerplate -- a standard layout for Tornado apps
 ===============================================================================
+## Summary
+The idea of SOPAX-TORNADO project is to communicate the existing SOPA Point of
+Sale with an MDB Communication system via Serial Port.
+[Main Reference](http://fabacademy.org/archives/2015/doc/WebSocketConsole.html)
 
 ## Description
 
