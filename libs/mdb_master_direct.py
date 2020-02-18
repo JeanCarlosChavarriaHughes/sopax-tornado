@@ -1,13 +1,14 @@
 #!/usr/bin/python3
-import g
-import socket
+
 import sys
+import libs.g as g
+import socket
 import serial
 import os
 import time
 import json
 import string
-from mdb import *
+import libs.mdb as mdb
 import select
     
 
@@ -272,8 +273,10 @@ def MainProcedure(serial_port=""):
     port = 5127
     try:
         print("Opening serial port")
-        if sys.argv[1]:
+        if len(sys.argv) >= 2:
             serial_port = sys.argv[1]
+        print("serial_port:")
+        print(serial_port)
         g.ser=serial.Serial(port=serial_port,baudrate=115200,timeout=0.3,rtscts=False,xonxoff=False)
         if g.ser.isOpen()==False:
             print("Cannot open serial port")
@@ -281,8 +284,10 @@ def MainProcedure(serial_port=""):
         else:
             g.ser.rts = False
             print("Serial port opened")
-    except:
+#    except:
+    except Exception as e:
         print("Error opening serial port")
+        print(str(e))
         sys.exit(3)
     try: 
         g.conn = socket.socket()
