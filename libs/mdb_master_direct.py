@@ -275,6 +275,7 @@ def MainProcedure(serial_port=""):
         if sys.argv[1]:
             serial_port = sys.argv[1]
         g.ser=serial.Serial(port=serial_port,baudrate=115200,timeout=0.3,rtscts=False,xonxoff=False)
+        # g.ser=serial.Serial(port=sys.serial_port,baudrate=115200,timeout=0.3,rtscts=False,xonxoff=False)
         if g.ser.isOpen()==False:
             print("Cannot open serial port")
             sys.exit(2)
