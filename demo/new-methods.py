@@ -164,17 +164,138 @@ cashlessCashSale = [0x13, 0x05, 0x00, 0x01, 0x00, 0x01, 0x16]
 #################################
 #################################
 
-ser.write(cashlessReset)
+def resetDevice(device):
+
+    device.write(cashlessReset)
+
+    #######################
+    #Respuesta del datafono
+    #######################
+
+    time.sleep(2) #tiempo de respuesta
+    read_Reset = device.read(size=128)
+    print("Reset: " + str(read_Reset))
+
+resetDevice(ser)
+
+def disableDevice(device):
+
+    device.write(cashlessDisable)
+
+    #######################
+    #Respuesta del datafono
+    #######################
+
+    time.sleep(2)
+    read_Disable = device.read(size=128)
+    print("Disable: " + str(read_Disable))
+
+disableDevice(ser)
+
+
+def enableDevice(device):
+
+    device.write(cashlessEnable)
+
+    #######################
+    #Respuesta del datafono
+    #######################
+
+    time.sleep(2)
+    read_Enable = device.read(size=128)
+    print("Enable: " + str(read_Enable))
+    time.sleep(20)
+
+enableDevice(ser)
+
+
+def pollDevice(device)
+
+    device.write(cashlessPoll)
+
+    #######################
+    #Respuesta del datafono
+    #######################
+
+    time.sleep(2)
+    read_Poll = device.read(size=128)
+    print("Poll: " + str(read_Poll))
+    time.sleep(1)
+
+    ser.write(cashlessPoll)
+
+    #######################
+    #Respuesta del datafono
+    #######################
+
+    time.sleep(2)
+    read_Poll = ser.read(size=128)
+    print("Poll: " + str(read_Poll))
+    time.sleep(5)
+
+
+pollDevice(ser)
+
+
+def vendRequest(device)
+
+    device.write(cashlessVendRequest)
+
+    #######################
+    #Respuesta del datafono
+    #######################
+
+    time.sleep(2)
+    read_VendRequest = device.read(size=128)
+    print("VendRequest: " + str(read_VendRequest))
+    time.sleep(2)
+
+vendRequest(ser)
+
+#ser.write(cashlessPoll)
+pollDevice(ser)
+
+#######################
+#Respuesta del datafono
+#######################
+"""
+time.sleep(2)
+read_Poll = device.read(size=128)
+print("Poll: " + str(read_Poll))
+"""
+
+def vendSuccess(device)
+
+    device.write(cashlessVendSuccess)
+
+    #######################
+    #Respuesta del datafono
+    #######################
+
+    time.sleep(2)
+    read_VendSuccess = ser.read(size=128)
+    print("VendSuccess: " + str(read_VendSuccess))
+
+vendSuccess(ser)
+
+pollDevice(ser)
+
+"""
+ser.write(cashlessPoll)
 
 #######################
 #Respuesta del datafono
 #######################
 
-time.sleep(2) #tiempo de respuesta
-read_Reset = ser.read(size=128)
-print("Reset: " + str(read_Reset))
+time.sleep(2)
+read_Poll = ser.read(size=128)
+print("Poll: " + str(read_Poll))
 
+"""
 
+disableDevice(ser)
+
+"""
 ser.write(cashlessDisable)
 
 #######################
@@ -184,92 +305,8 @@ ser.write(cashlessDisable)
 time.sleep(2)
 read_Disable = ser.read(size=128)
 print("Disable: " + str(read_Disable))
+"""
 
-
-
-ser.write(cashlessEnable)
-
-#######################
-#Respuesta del datafono
-#######################
-
-time.sleep(2)
-read_Enable = ser.read(size=128)
-print("Enable: " + str(read_Enable))
-time.sleep(20)
-
-ser.write(cashlessPoll)
-
-#######################
-#Respuesta del datafono
-#######################
-
-time.sleep(2)
-read_Poll = ser.read(size=128)
-print("Poll: " + str(read_Poll))
-time.sleep(1)
-
-ser.write(cashlessPoll)
-
-#######################
-#Respuesta del datafono
-#######################
-
-time.sleep(2)
-read_Poll = ser.read(size=128)
-print("Poll: " + str(read_Poll))
-time.sleep(5)
-
-ser.write(cashlessVendRequest)
-
-#######################
-#Respuesta del datafono
-#######################
-
-time.sleep(2)
-read_VendRequest = ser.read(size=128)
-print("VendRequest: " + str(read_VendRequest))
-time.sleep(2)
-
-ser.write(cashlessPoll)
-
-#######################
-#Respuesta del datafono
-#######################
-
-time.sleep(2)
-read_Poll = ser.read(size=128)
-print("Poll: " + str(read_Poll))
-
-ser.write(cashlessVendSuccess)
-
-#######################
-#Respuesta del datafono
-#######################
-
-time.sleep(2)
-read_VendSuccess = ser.read(size=128)
-print("VendSuccess: " + str(read_VendSuccess))
-
-ser.write(cashlessPoll)
-
-#######################
-#Respuesta del datafono
-#######################
-
-time.sleep(2)
-read_Poll = ser.read(size=128)
-print("Poll: " + str(read_Poll))
-
-ser.write(cashlessDisable)
-
-#######################
-#Respuesta del datafono
-#######################
-
-time.sleep(2)
-read_Disable = ser.read(size=128)
-print("Disable: " + str(read_Disable))
 
 ###############
 #Cierra serial#
