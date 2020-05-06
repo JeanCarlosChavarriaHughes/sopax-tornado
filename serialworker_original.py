@@ -5,7 +5,6 @@ import serial
 import time
 import multiprocessing
 from settings import settings
-import libs.mdb_master_direct as mdbi
 
 class SerialProcess(multiprocessing.Process):
  
@@ -28,9 +27,7 @@ class SerialProcess(multiprocessing.Process):
     def run(self):
  
         self.sp.flushInput()
-        mdbi.internalMain(settings['SERIAL_PORT'])
-
-        """
+ 
         while True:
             # look for incoming tornado request
             if not self.input_queue.empty():
@@ -46,4 +43,3 @@ class SerialProcess(multiprocessing.Process):
                 print ("reading from serial: " + data)
                 # send it back to tornado
                 self.output_queue.put(data)
-        """

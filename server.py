@@ -35,7 +35,7 @@ if __name__ == '__main__':
     main_web_socket = WebSocketHandler
     sp = serialworker.SerialProcess(main_web_socket.input_queue, main_web_socket.output_queue)
     sp.daemon = True
-    sp.start()
+    sp.start() #  https://stackoverflow.com/questions/55084433/difference-between-process-run-and-process-start
 
     # Start Web Application
     tornado.options.parse_command_line()
