@@ -15,7 +15,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 SERIAL_PORT = '/dev/ttyUSB0'
 SERIAL_BAUDRATE = 115200
 
-define("port", default=8888, help="run on the given port", type=int)
+define("port", default=5127, help="run on the given port", type=int)
 define("config", default=None, help="tornado config file")
 define("debug", default=False, help="debug mode")
 tornado.options.parse_command_line()
