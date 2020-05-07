@@ -15,7 +15,7 @@ def from_hex(hexdigits):
 
 precio = input("ingrese precio en colones")
 posicion = input("ingrese el canal del producto")
-tipoDePago = input("Seleccione Efectivo o Tarjeta")
+#tipoDePago = input("Seleccione Efectivo o Tarjeta")
 
 precioHex = str(hex(int(precio)))
 posicionHex = str(hex(int(posicion)))
@@ -201,15 +201,37 @@ def enableDevice(device):
     #Respuesta del datafono
     #######################
 
-    time.sleep(2)
+    time.sleep(1)
     read_Enable = device.read(size=128)
     print("Enable: " + str(read_Enable))
-    time.sleep(20)
 
 enableDevice(ser)
 
+def pollEnableDevice(device): #este metodo es para comprobar que llega un 03 (begin idle)
 
-def pollDevice(device)
+    device.write(cashlessPoll)
+
+    #######################
+    #Respuesta del datafono
+    #######################
+
+    read_Poll = device.read(size=128)
+    print("Poll: " + str(read_Poll))
+    read_PollStr = str(read_Poll)
+
+    while read_PollStr == "b''" or read_PollStr[5] == str(0):
+        ser.write(cashlessPoll)
+        read_Poll = device.read(size=128)
+        read_PollStr = str(read_Poll)
+        print("Poll: " + str(read_Poll))
+        time.sleep(1)
+        if read_PollStr != "b''":
+            if read_PollStr[5] == str(3):
+                break
+
+pollEnableDevice(ser)
+
+def pollDevice(device):
 
     device.write(cashlessPoll)
 
@@ -220,24 +242,12 @@ def pollDevice(device)
     time.sleep(2)
     read_Poll = device.read(size=128)
     print("Poll: " + str(read_Poll))
-    time.sleep(1)
 
     ser.write(cashlessPoll)
 
-    #######################
-    #Respuesta del datafono
-    #######################
-
-    time.sleep(2)
-    read_Poll = ser.read(size=128)
-    print("Poll: " + str(read_Poll))
-    time.sleep(5)
 
 
-pollDevice(ser)
-
-
-def vendRequest(device)
+def vendRequest(device):
 
     device.write(cashlessVendRequest)
 
@@ -252,19 +262,9 @@ def vendRequest(device)
 
 vendRequest(ser)
 
-#ser.write(cashlessPoll)
 pollDevice(ser)
 
-#######################
-#Respuesta del datafono
-#######################
-"""
-time.sleep(2)
-read_Poll = device.read(size=128)
-print("Poll: " + str(read_Poll))
-"""
-
-def vendSuccess(device)
+def vendSuccess(device):
 
     device.write(cashlessVendSuccess)
 
@@ -273,40 +273,16 @@ def vendSuccess(device)
     #######################
 
     time.sleep(2)
-    read_VendSuccess = ser.read(size=128)
+    read_VendSuccess = device.read(size=128)
     print("VendSuccess: " + str(read_VendSuccess))
 
 vendSuccess(ser)
 
 pollDevice(ser)
 
-"""
-ser.write(cashlessPoll)
-
-#######################
-#Respuesta del datafono
-#######################
-
-time.sleep(2)
-read_Poll = ser.read(size=128)
-print("Poll: " + str(read_Poll))
-
-"""
-
 disableDevice(ser)
 
-"""
-ser.write(cashlessDisable)
-
-#######################
-#Respuesta del datafono
-#######################
-
-time.sleep(2)
-read_Disable = ser.read(size=128)
-print("Disable: " + str(read_Disable))
-"""
-
+resetDevice(ser)
 
 ###############
 #Cierra serial#
