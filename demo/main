@@ -1,0 +1,348 @@
+from PyQt5 import QtCore, QtGui, QtWidgets
+import tkinter as tk
+from prueba2 import ejecutarComandos
+import serial
+import time
+from IPython.display import Image
+
+
+cashlessVendRequest = 0
+cashlessVendSuccess = 0
+ser = serial.Serial()
+
+def from_hex(hexdigits):
+    return int(hexdigits, 16)
+
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(470, 335)
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.LBL_Titulo = QtWidgets.QLabel(self.centralwidget)
+        self.LBL_Titulo.setEnabled(True)
+        self.LBL_Titulo.move(10, 10)
+        self.LBL_Titulo.resize(450, 40)
+        self.LBL_Titulo.setText("SOPAX")
+        self.LBL_Titulo.setAlignment(QtCore.Qt.AlignCenter)
+        self.LBL_Titulo.setStyleSheet("border: 3px solid orange; border-radius: 20px; background: white; color: orange; font: 30px bold")
+        self.LBL_Titulo.setObjectName("LBL_Titulo")
+        self.BTN_Reset = QtWidgets.QPushButton(self.centralwidget)
+        self.BTN_Reset.setGeometry(QtCore.QRect(10, 60, 75, 35))
+        self.BTN_Reset.setAutoFillBackground(False)
+        self.BTN_Reset.setObjectName("BTN_Reset")
+        self.BTN_Reset.clicked.connect(self.activarReset)
+        self.BTN_Reset.setStyleSheet("border: 1px solid black; border-radius: 10px; background: gray; color: white; font: 15px")
+        self.BTN_Activar = QtWidgets.QPushButton(self.centralwidget)
+        self.BTN_Activar.setGeometry(QtCore.QRect(180, 60, 75, 35))
+        self.BTN_Activar.setAutoFillBackground(False)
+        self.BTN_Activar.setObjectName("BTN_Activar")
+        self.BTN_Activar.setStyleSheet("border: 1px solid orange; border-radius: 10px; background: white; color: black; font: 15px")
+        self.BTN_Activar.clicked.connect(self.activarDatafono)
+        self.BTN_Ingresar = QtWidgets.QPushButton(self.centralwidget)
+        self.BTN_Ingresar.setGeometry(QtCore.QRect(180, 60, 75, 35))
+        self.BTN_Ingresar.setAutoFillBackground(False)
+        self.BTN_Ingresar.setObjectName("BTN_Ingresar")
+        self.BTN_Ingresar.setStyleSheet("border: 1px solid orange; border-radius: 10px; background: white; color: black; font: 15px")
+        self.BTN_Ingresar.clicked.connect(self.ingresar)
+        self.LBL_Estado = QtWidgets.QLabel(self.centralwidget)
+        self.LBL_Estado.setEnabled(True)
+        self.LBL_Estado.move(260, 60)
+        self.LBL_Estado.resize(40, 40)
+        self.LBL_Estado.setStyleSheet("border: 3px solid red; border-radius: 20px; background: red")
+        self.LBL_Estado.setObjectName("LBL_Estado")
+        self.CMB_Producto = QtWidgets.QComboBox(self.centralwidget)
+        self.CMB_Producto.setGeometry(QtCore.QRect(170, 110, 100, 25))
+        self.CMB_Producto.setObjectName("CMB_Producto")
+        self.CMB_Producto.addItem("")
+        self.CMB_Producto.addItem("")
+        self.CMB_Producto.addItem("")
+        self.CMB_Producto.setStyleSheet("border: 2px solid gray; background: white")
+        self.TXT_Monto = QtWidgets.QLineEdit(self.centralwidget)
+        self.TXT_Monto.setGeometry(QtCore.QRect(160, 150, 120, 20))
+        self.TXT_Monto.setObjectName("TXT_Monto")
+        self.TXT_Monto.setStyleSheet("border: 2px solid gray; background: white")
+        self.BTN_Venta = QtWidgets.QPushButton(self.centralwidget)
+        self.BTN_Venta.setGeometry(QtCore.QRect(165, 230, 115, 23))
+        self.BTN_Venta.setAutoFillBackground(False)
+        self.BTN_Venta.setObjectName("BTN_Venta")
+        self.BTN_Venta.clicked.connect(self.generarVenta)
+        self.BTN_Venta.setStyleSheet("border: 1px solid orange; border-radius: 10px; background: white; color: black; font: 15px")
+        self.CMB_MetodoPago = QtWidgets.QComboBox(self.centralwidget)
+        self.CMB_MetodoPago.setGeometry(QtCore.QRect(170, 190, 101, 22))
+        self.CMB_MetodoPago.setObjectName("CMB_MetodoPago")
+        self.CMB_MetodoPago.addItem("")
+        self.CMB_MetodoPago.addItem("")
+        self.CMB_MetodoPago.addItem("")
+        self.CMB_MetodoPago.addItem("")
+        self.CMB_MetodoPago.setStyleSheet("border: 2px solid gray; background: white")
+        self.LBL_EstadoPago = QtWidgets.QLabel(self.centralwidget)
+        self.LBL_EstadoPago.setEnabled(True)
+        self.LBL_EstadoPago.move(198, 260)
+        self.LBL_EstadoPago.resize(40, 40)
+        self.LBL_EstadoPago.setStyleSheet("border: 3px solid yellow; border-radius: 20px; background: yellow")
+        self.LBL_EstadoPago.setObjectName("LBL_EstadoPago")
+
+        self.LBL_EstadoPagoAprobadoCancel = QtWidgets.QLabel(self.centralwidget)
+        self.LBL_EstadoPagoAprobadoCancel.setEnabled(True)
+        self.LBL_EstadoPagoAprobadoCancel.move(198, 260)
+        self.LBL_EstadoPagoAprobadoCancel.resize(50, 50)
+        self.LBL_EstadoPagoAprobadoCancel.setObjectName("LBL_EstadoPagoAceptado")
+
+        self.BTN_Salir = QtWidgets.QPushButton(self.centralwidget)
+        self.BTN_Salir.setGeometry(QtCore.QRect(380, 300, 75, 25))
+        self.BTN_Salir.setAutoFillBackground(False)
+        self.BTN_Salir.setObjectName("BTN_Salir")
+        self.BTN_Salir.setStyleSheet("border: 1px solid black; border-radius: 10px; background: white; color: gray; font: 15px")
+        self.BTN_Salir.clicked.connect(self.salir)
+
+        self.BTN_Apagar = QtWidgets.QPushButton(self.centralwidget)
+        self.BTN_Apagar.setGeometry(QtCore.QRect(380, 300, 75, 25))
+        self.BTN_Apagar.setAutoFillBackground(False)
+        self.BTN_Apagar.setObjectName("BTN_Salir")
+        self.BTN_Apagar.setStyleSheet("border: 1px solid black; border-radius: 10px; background: white; color: gray; font: 15px")
+        self.BTN_Apagar.clicked.connect(MainWindow.close)
+
+        MainWindow.setCentralWidget(self.centralwidget)
+
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.salir()
+
+        # ocultar las opciones
+
+
+
+    def retranslateUi(self, MainWindow):
+        iconName = "home.png"
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "SOPA"))
+        MainWindow.setWindowIcon(QtGui.QIcon(iconName))
+        self.BTN_Reset.setText(_translate("MainWindow", "Reset"))# botonReset
+        self.BTN_Activar.setText(_translate("MainWindow", "Activar"))#botonActivar
+        self.BTN_Ingresar.setText(_translate("MainWindow", "Ingresar")) #BotonIngresar
+        self.CMB_Producto.setItemText(0, _translate("MainWindow", "Producto 1"))
+        self.CMB_Producto.setItemText(1, _translate("MainWindow", "Producto 2"))
+        self.CMB_Producto.setItemText(2, _translate("MainWindow", "Producto 3"))
+        self.BTN_Venta.setText(_translate("MainWindow", "Generar Venta")) #botonVenta
+        self.CMB_MetodoPago.setItemText(0, _translate("MainWindow", "Método Pago"))
+        self.CMB_MetodoPago.setItemText(1, _translate("MainWindow", "Efectivo"))
+        self.CMB_MetodoPago.setItemText(2, _translate("MainWindow", "Tarjeta"))
+        self.CMB_MetodoPago.setItemText(3, _translate("MainWindow", "Contactless"))
+        self.BTN_Salir.setText(_translate("MainWindow", "Salir")) #botonSalir
+        self.BTN_Apagar.setText(_translate("MainWindow", "Apagar"))
+
+    def ingresar(self):
+        self.BTN_Ingresar.setVisible(False)
+        self.BTN_Apagar.setVisible(False)
+
+        self.LBL_Estado.setVisible(False)
+        self.LBL_EstadoPago.setVisible(False)
+        self.LBL_EstadoPagoAprobadoCancel.setVisible(False)
+        self.CMB_Producto.setVisible(False)
+        self.TXT_Monto.setVisible(False)
+        self.CMB_MetodoPago.setVisible(False)
+        self.BTN_Venta.setVisible(False)
+
+        self.BTN_Activar.setVisible(True)
+        self.BTN_Reset.setVisible(True)
+        self.BTN_Salir.setVisible(True)
+
+    def salir(self):
+        self.BTN_Reset.setVisible(False)
+        self.BTN_Activar.setVisible(False)
+        self.BTN_Venta.setVisible(False)
+        self.BTN_Salir.setVisible(False)
+        self.LBL_Estado.setVisible(False)
+        self.LBL_EstadoPagoAprobadoCancel.setVisible(False)
+        self.LBL_EstadoPago.setVisible(False)
+        self.CMB_Producto.setVisible(False)
+        self.CMB_MetodoPago.setVisible(False)
+        self.TXT_Monto.setVisible(False)
+
+        self.BTN_Ingresar.setVisible(True)
+        self.BTN_Apagar.setVisible(True)
+
+    def activarDatafono(self):
+
+        def task():
+            # The window will stay open until this function call ends.
+            activarSerial = ejecutarComandos.serialSet(ser)
+            ejecutarComandos.resetDevice(activarSerial)
+            ejecutarComandos.disableDevice(activarSerial)
+            activado = ejecutarComandos.enableDevice(activarSerial)
+            time.sleep(5)
+            ejecutarComandos.disableDevice(activarSerial)
+            ejecutarComandos.resetDevice(activarSerial)
+            self.LBL_Estado.setVisible(True)
+            if (activado):
+                self.LBL_Estado.setStyleSheet("border: 3px solid green; border-radius: 20px; background: green")
+            else:
+                self.LBL_Estado.setStyleSheet("border: 3px solid red; border-radius: 20px; background: red")
+
+            activarSerial = ejecutarComandos.cierraSerial(ser)
+
+            # mostrar las opciones
+
+            self.LBL_EstadoPago.setVisible(True)
+            self.CMB_Producto.setVisible(True)
+            self.TXT_Monto.setVisible(True)
+            self.CMB_MetodoPago.setVisible(True)
+            self.BTN_Venta.setVisible(True)
+
+            # Replace this with the code you want to run
+
+            root.destroy()
+
+        root = tk.Tk()
+        root.title("Por favor espere")
+        root.geometry("300x100+540+300")
+
+        label = tk.Label(root, text="\nEncendiendo\nDatafono...")
+        label.pack()
+
+        root.after(200, task)
+        root.mainloop()
+
+
+    def generarVenta(self):
+
+        self.LBL_EstadoPago.setVisible(False)
+        def task():
+        # The window will stay open until this function call ends.
+
+            producto = self.CMB_Producto.currentText()
+            if (producto == "Producto 1"):
+                producto = 12
+            elif (producto == "Producto 2"):
+                producto = 25
+            elif (producto == "Producto 3"):
+                producto = 36
+            monto = self.TXT_Monto.text()
+            medioPago = self.CMB_MetodoPago.currentText()
+            if medioPago == "Efectivo":
+                medioPago = 2
+                self.ejecutarDatafonoCash(producto, monto)
+            else:
+                medioPago = 1
+                self.ejecutarDatafonoCashless(producto, monto)
+
+            root.destroy()
+
+        root = tk.Tk()
+        root.title("Por favor espere")
+        root.geometry("300x100+540+300")
+
+        label = tk.Label(root, text="\nProcesando\nPago...")
+        label.pack()
+
+        root.after(200, task)
+        root.mainloop()
+
+    def ejecutarDatafonoCash(self, producto, monto):
+
+        variablesProducto = ejecutarComandos.ingresoValoresCash(producto, monto)
+        ejecucionVenta = ejecutarComandos.serialSet(ser)
+        ejecutarComandos.resetDevice(ejecucionVenta)
+        ejecutarComandos.disableDevice(ejecucionVenta)
+        ejecutarComandos.vendRequestCash(ejecucionVenta,variablesProducto[0])
+        ejecutarComandos.disableDevice(ejecucionVenta)
+        ejecutarComandos.resetDevice(ejecucionVenta)
+        ejecucionVenta = ejecutarComandos.cierraSerial(ser)
+
+        #cambiar a estado amarillo
+        self.LBL_EstadoPago.setVisible(False)
+
+        self.LBL_EstadoPagoAprobadoCancel.setVisible(False)
+
+    def ejecutarDatafonoCashless(self, producto, monto):
+
+        variablesProducto = ejecutarComandos.ingresoValores(producto, monto)
+        ejecucionVenta = ejecutarComandos.serialSet(ser)
+
+        ejecutarComandos.resetDevice(ejecucionVenta)
+        ejecutarComandos.disableDevice(ejecucionVenta)
+        ejecutarComandos.enableDevice(ejecucionVenta)
+        ejecutarComandos.pollEnableDevice(ejecucionVenta)
+
+        ejecutarComandos.vendRequest(ejecucionVenta,variablesProducto[0])
+        ventaExitosa = ejecutarComandos.pollDeviceVendRequest(ejecucionVenta)
+
+        if (ventaExitosa):
+
+            ejecutarComandos.vendSuccess(ejecucionVenta,variablesProducto[1])
+            ejecutarComandos.pollDevice(ejecucionVenta)
+            ejecutarComandos.disableDevice(ejecucionVenta)
+            ejecutarComandos.resetDevice(ejecucionVenta)
+
+            self.LBL_EstadoPagoAprobadoCancel.setPixmap(QtGui.QPixmap('check.jpg'))
+            self.LBL_EstadoPagoAprobadoCancel.setVisible(True)
+
+        else:
+
+            ejecutarComandos.vendCancel(ejecucionVenta)
+            ejecutarComandos.resetDevice(ejecucionVenta)
+            ejecutarComandos.pollDevice(ejecucionVenta)
+            ejecutarComandos.disableDevice(ejecucionVenta)
+
+            self.LBL_EstadoPagoAprobadoCancel.setPixmap(QtGui.QPixmap('cancel.jpg'))
+            self.LBL_EstadoPagoAprobadoCancel.setVisible(True)
+
+        ejecucionVenta = ejecutarComandos.cierraSerial(ser)
+
+    def activarReset(self):
+
+        def task():
+            # The window will stay open until this function call ends.
+
+            # Define variables y se ejecutan
+
+            ejecucionVenta = ejecutarComandos.serialSet(ser)
+
+            ejecutarComandos.disableDevice(ejecucionVenta)
+            ejecutarComandos.pollDevice(ejecucionVenta)
+            ejecutarComandos.resetDevice(ejecucionVenta)
+
+            ejecucionVenta = ejecutarComandos.cierraSerial(ser)
+
+            # ocultar las opciones
+
+            self.LBL_EstadoPago.setVisible(False)
+            self.CMB_Producto.setVisible(False)
+            self.TXT_Monto.setVisible(False)
+            self.CMB_MetodoPago.setVisible(False)
+            self.BTN_Venta.setVisible(False)
+            self.LBL_EstadoPagoAprobadoCancel.setVisible(False)
+
+            # cambiar de estado los botones
+
+            self.LBL_EstadoPago.setStyleSheet("border: 3px solid yellow; border-radius: 20px; background: yellow")
+            self.LBL_Estado.setStyleSheet("border: 3px solid red; border-radius: 20px; background: red")
+
+            #Limpiar edit text
+
+            self.TXT_Monto.clear()
+
+            root.destroy()
+
+        root = tk.Tk()
+        root.title("Por favor espere")
+        root.geometry("300x100+540+300")
+
+        label = tk.Label(root, text="\nReseteando\nDatafono...")
+        label.pack()
+        root.after(200, task)
+        root.mainloop()
+
+    def cargarImagenAceptado(self):
+        img = "C:/Users/wvm_1/Desktop/check-in.jpg"
+        Image(url=img, width=100, height=100)
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
