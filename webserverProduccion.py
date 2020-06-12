@@ -26,22 +26,23 @@ class servidorSOPAX(object):
 
     def generarVenta(self, producto, monto, medioPago):
 
-            # The window will stay open until this function call ends.
+        # The window will stay open until this function call ends.
 
-            if (producto == "Producto 1"):
-                producto = 12
-            elif (producto == "Producto 2"):
-                producto = 25
-            elif (producto == "Producto 3"):
-                producto = 36
+        if (producto == "Producto 1"):
+            producto = 12
+        elif (producto == "Producto 2"):
+            producto = 25
+        elif (producto == "Producto 3"):
+            producto = 36
 
-            if medioPago == "Efectivo":
-                medioPago = 2
-                servidorSOPAX.ejecutarDatafonoCash(self, producto, monto)
-            else:
-                medioPago = 1
-                servidorSOPAX.ejecutarDatafonoCashless(self, producto, monto)
-
+        if medioPago == "Efectivo":
+            medioPago = 2
+            respuestaGV = servidorSOPAX.ejecutarDatafonoCash(self, producto, monto)
+            return respuestaGV
+        else:
+            medioPago = 1
+            respuestaGV = servidorSOPAX.ejecutarDatafonoCashless(self, producto, monto)
+            return respuestaGV
     def ejecutarDatafonoCash(self, producto, monto):
 
         variablesProducto = ejecutarComandos.ingresoValoresCash(producto, monto)
@@ -52,7 +53,8 @@ class servidorSOPAX(object):
         ejecutarComandos.disableDevice(ejecucionVenta)
         ejecutarComandos.resetDevice(ejecucionVenta)
         ejecucionVenta = ejecutarComandos.cierraSerial(ser)
-
+        respuestaCash = "efectivo_aceptado"
+        return respuestaCash
 
     def ejecutarDatafonoCashless(self, producto, monto):
 
@@ -73,13 +75,16 @@ class servidorSOPAX(object):
             ejecutarComandos.pollDevice(ejecucionVenta)
             ejecutarComandos.disableDevice(ejecucionVenta)
             ejecutarComandos.resetDevice(ejecucionVenta)
-
+            respuestaCashLess = "venta_aprobada"
+            return respuestaCashLess
         else:
 
             ejecutarComandos.vendCancel(ejecucionVenta)
             ejecutarComandos.resetDevice(ejecucionVenta)
             ejecutarComandos.pollDevice(ejecucionVenta)
             ejecutarComandos.disableDevice(ejecucionVenta)
+            respuestaCashLess = "venta_denegada"
+            return respuestaCashLess
 
         ejecucionVenta = ejecutarComandos.cierraSerial(ser)
 
@@ -109,9 +114,9 @@ async def response(websocket, path):
     precioCanal = dividirPP[1]
     metodoPago = dividirPP[2]
 
-    servidorSOPAX.generarVenta(self, productoCanal, precioCanal, metodoPago)
+    messageResp = servidorSOPAX.generarVenta(self, productoCanal, precioCanal, metodoPago)
 
-    await websocket.send("I can confirm I got your message is: " + message)
+    await websocket.send("I can confirm I got your message is: " + messageResp)
     print("Send Message")
 
 start_server = websockets.serve(response, 'localhost', 8080)
