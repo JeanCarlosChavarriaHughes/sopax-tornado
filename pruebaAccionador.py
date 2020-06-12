@@ -1,125 +1,505 @@
-import asyncio
-import websockets
-from pruebaAccionador import ejecutarComandos
 import serial
 import time
+import serial.tools.list_ports
 
-cashlessVendRequest = 0
-cashlessVendSuccess = 0
-ser = serial.Serial()
-self = None
+ser = serial.Serial() #variable inicial del serial
 
-class servidorSOPAX(object):
+class ejecutarComandos(object):
 
-    def activarDatafonoServidor(self):
+    def from_hex(hexdigits):
 
-        # The window will stay open until this function call ends.
+        return int(hexdigits, 16)
 
-        activarSerial = ejecutarComandos.serialSet(ser)
-        ejecutarComandos.resetDevice(activarSerial)
-        ejecutarComandos.disableDevice(activarSerial)
-        activado = ejecutarComandos.enableDevice(activarSerial)
-        time.sleep(5)
-        ejecutarComandos.disableDevice(activarSerial)
-        ejecutarComandos.resetDevice(activarSerial)
-        ejecutarComandos.cierraSerial(activarSerial)
+    def ingresoValores(posicion, precio):
 
-    def generarVenta(self, producto, monto, medioPago):
+        ########################
+        #Suma valores para crc #
+        ########################
 
-        # The window will stay open until this function call ends.
+        #sumatoria en hex
+        def from_hex(self):
 
-        if (producto == "Producto 1"):
-            producto = 12
-        elif (producto == "Producto 2"):
-            producto = 25
-        elif (producto == "Producto 3"):
-            producto = 36
+            return int(self, 16)
 
-        if medioPago == "Efectivo":
-            medioPago = 2
-            respuestaGV = servidorSOPAX.ejecutarDatafonoCash(self, producto, monto)
-            return respuestaGV
+        ## Variables iniciales
+
+        precioHex = str(hex(int(precio)))
+        posicionHex = str(hex(int(posicion)))
+
+        print([precioHex,posicionHex])
+
+        if len(precioHex)==5 or len(precioHex)==6:
+
+            f = 0
+            for i in precioHex:
+
+                if len(precioHex)==5:
+                    if f == 2:
+                        numHex = "0x0"+i
+                    elif f == 3:
+                        numHex2 = "0x"+i
+                    elif f == 4:
+                        numHex3 = numHex2+i
+                        print(numHex +" "+numHex3+" "+posicionHex)
+                        crc = hex(from_hex("0x13") + from_hex(numHex)+from_hex(numHex3)+from_hex(posicionHex))
+                        crc2 = hex(from_hex("0x13") + from_hex("0x02") + from_hex(posicionHex))
+                        if len(crc)==5 or len(crc)==6:
+                            c=0
+                            for j in crc:
+                                if len(crc)==5 and c==3:
+                                    numCrc = "0x" + j
+                                elif len(crc)==5 and c==4:
+                                    crc = numCrc + j
+                                    print("crc: "+crc+" y el precio:" + numHex +","+numHex3 + " posicion: "
+                                          +posicionHex)
+                                    cashlessVendRequest = [0x13,0x00,int(numHex,16),int(numHex3,16),0x00,
+                                                           int(posicionHex,16)
+                                        ,int(crc,16)]
+                                    cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+                                    print(cashlessVendRequest)
+                                    print(cashlessVendSuccess)
+                                    break
+                                elif len(crc)==6 and c==4:
+                                    numCrc = "0x" + j
+                                elif len(crc)==6 and c==5:
+                                    crc = numCrc + j
+                                    print("crc: "+crc +" y el precio:" + numHex +","+numHex3 + " posicion: "
+                                          +posicionHex)
+                                    cashlessVendRequest = [0x13,0x00,int(numHex,16),int(numHex3,16),0x00
+                                        ,int(posicionHex,16)
+                                        ,int(crc,16)]
+                                    cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+                                    print(cashlessVendRequest)
+                                    print(cashlessVendSuccess)
+                                    break
+                                c += 1
+                        else:
+                            print("crc: "+crc +" y el precio:" + numHex +","+numHex3 + " posicion: "+posicionHex)
+                            cashlessVendRequest = [0x13,0x00,int(numHex,16),int(numHex3,16),0x00,int(posicionHex,16),
+                                                   int(crc,16)]
+                            cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+                            print(cashlessVendRequest)
+                            print(cashlessVendSuccess)
+                            break
+                elif len(precioHex) == 6:
+                    if f == 2:
+                        numHex= "0x"+i
+
+                    elif f == 3:
+                        numHex2= numHex+i
+
+                    elif f == 4:
+                        numHex3= "0x"+i
+
+                    elif f == 5:
+                        numHex4= numHex3+i
+                        print(numHex2 +" "+numHex4+" "+posicionHex)
+                        crc = hex(from_hex("0x13") + from_hex(numHex2) + from_hex(numHex4) + from_hex(posicionHex))
+                        crc2 = hex(from_hex("0x13") + from_hex("0x02") + from_hex(posicionHex))
+                        if len(crc)==5 or len(crc)==6:
+                            c=0
+                            for j in crc:
+                                if len(crc)==5 and c==3:
+                                    numCrc = "0x" + j
+                                elif len(crc)==5 and c==4:
+                                    crc = numCrc + j
+                                    print("crc: "+crc)
+                                    cashlessVendRequest = [0x13,0x00,int(numHex2,16),int(numHex4,16),0x00,
+                                                           int(posicionHex,16),int(crc,16)]
+                                    cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+                                    print(cashlessVendRequest)
+                                    print(cashlessVendSuccess)
+                                    break
+                                elif len(crc)==6 and c==4:
+                                    numCrc = "0x" + j
+                                elif len(crc)==6 and c==5:
+                                    crc = numCrc + j
+                                    print("crc: "+crc+" y el precio:" + numHex2 +","+numHex4 + " posicion: "
+                                          +posicionHex)
+                                    cashlessVendRequest = [0x13,0x00,int(numHex2,16),int(numHex4,16),0x00,
+                                                           int(posicionHex,16),int(crc,16)]
+                                    cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+                                    print(cashlessVendRequest)
+                                    print(cashlessVendSuccess)
+                                    break
+                                c += 1
+                        else:
+                            print("crc: "+crc+" y el precio:" + numHex2 +","+numHex4 + " posicion: "+posicionHex)
+                            cashlessVendRequest = [0x13,0x00,int(numHex2,16),int(numHex4,16),0x00,
+                                                   int(posicionHex,16),int(crc,16)]
+                            cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+                            print(cashlessVendRequest)
+                            print(cashlessVendSuccess)
+                            break
+                f += 1
+
         else:
-            medioPago = 1
-            respuestaGV = servidorSOPAX.ejecutarDatafonoCashless(self, producto, monto)
-            return respuestaGV
-    def ejecutarDatafonoCash(self, producto, monto):
 
-        variablesProducto = ejecutarComandos.ingresoValoresCash(producto, monto)
-        ejecucionVenta = ejecutarComandos.serialSet(ser)
-        ejecutarComandos.resetDevice(ejecucionVenta)
-        ejecutarComandos.disableDevice(ejecucionVenta)
-        ejecutarComandos.vendRequestCash(ejecucionVenta,variablesProducto[0])
-        ejecutarComandos.disableDevice(ejecucionVenta)
-        ejecutarComandos.resetDevice(ejecucionVenta)
-        ejecucionVenta = ejecutarComandos.cierraSerial(ser)
-        respuestaCash = "efectivo_aceptado"
-        return respuestaCash
+            crc = hex(from_hex("0x13") + from_hex(precioHex) + from_hex(posicionHex))
+            crc2 = hex(from_hex("0x13") + from_hex("0x02") + from_hex(posicionHex))
+            cashlessVendRequest = [0x13,0x00,0x00,int(precioHex,16),0x00,int(posicionHex,16),int(crc,16)]
+            cashlessVendSuccess = [0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+            print(cashlessVendRequest)
+            print(cashlessVendSuccess)
+        return (cashlessVendRequest,cashlessVendSuccess)
 
-    def ejecutarDatafonoCashless(self, producto, monto):
+    def ingresoValoresCash(posicion, precio):
 
-        variablesProducto = ejecutarComandos.ingresoValores(producto, monto)
-        ejecucionVenta = ejecutarComandos.serialSet(ser)
+        ########################
+        #Suma valores para crc #
+        ########################
 
-        ejecutarComandos.resetDevice(ejecucionVenta)
-        ejecutarComandos.disableDevice(ejecucionVenta)
-        ejecutarComandos.enableDevice(ejecucionVenta)
-        ejecutarComandos.pollEnableDevice(ejecucionVenta)
+        #sumatoria en hex
+        def from_hex(self):
+            return int(self, 16)
 
-        ejecutarComandos.vendRequest(ejecucionVenta,variablesProducto[0])
-        ventaExitosa = ejecutarComandos.pollDeviceVendRequest(ejecucionVenta)
+        ## Variables iniciales
 
-        if (ventaExitosa):
+        precioHex = str(hex(int(precio)))
+        posicionHex = str(hex(int(posicion)))
 
-            ejecutarComandos.vendSuccess(ejecucionVenta,variablesProducto[1])
-            ejecutarComandos.pollDevice(ejecucionVenta)
-            ejecutarComandos.disableDevice(ejecucionVenta)
-            ejecutarComandos.resetDevice(ejecucionVenta)
-            respuestaCashLess = "venta_aprobada"
-            return respuestaCashLess
+        print([precioHex,posicionHex])
+
+        if len(precioHex)==5 or len(precioHex)==6:
+
+            f = 0
+            for i in precioHex:
+
+                if len(precioHex)==5:
+                    if f == 2:
+                        numHex = "0x0"+i
+                    elif f == 3:
+                        numHex2 = "0x"+i
+                    elif f == 4:
+                        numHex3 = numHex2+i
+                        print(numHex +" "+numHex3+" "+posicionHex)
+                        crc = hex(from_hex("0x13")+ from_hex("0x05") + from_hex(numHex)+from_hex(numHex3)+from_hex(posicionHex))
+                        crc2 = hex(from_hex("0x13") + from_hex("0x02") + from_hex(posicionHex))
+                        if len(crc)==5 or len(crc)==6:
+                            c=0
+                            for j in crc:
+                                if len(crc)==5 and c==3:
+                                    numCrc = "0x" + j
+                                elif len(crc)==5 and c==4:
+                                    crc = numCrc + j
+                                    print("crc: "+crc+" y el precio:" + numHex +","+numHex3 + " posicion: "
+                                          +posicionHex)
+                                    cashlessVendRequest = [0x13,0x05,int(numHex,16),int(numHex3,16),0x00,
+                                                           int(posicionHex,16)
+                                        ,int(crc,16)]
+                                    cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+                                    print(cashlessVendRequest)
+                                    print(cashlessVendSuccess)
+                                    break
+                                elif len(crc)==6 and c==4:
+                                    numCrc = "0x" + j
+                                elif len(crc)==6 and c==5:
+                                    crc = numCrc + j
+                                    print("crc: "+crc +" y el precio:" + numHex +","+numHex3 + " posicion: "
+                                          +posicionHex)
+                                    cashlessVendRequest = [0x13,0x05,int(numHex,16),int(numHex3,16),0x00
+                                        ,int(posicionHex,16)
+                                        ,int(crc,16)]
+                                    cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+                                    print(cashlessVendRequest)
+                                    print(cashlessVendSuccess)
+                                    break
+                                c += 1
+                        else:
+                            print("crc: "+crc +" y el precio:" + numHex +","+numHex3 + " posicion: "+posicionHex)
+                            cashlessVendRequest = [0x13,0x05,int(numHex,16),int(numHex3,16),0x00,int(posicionHex,16),
+                                                   int(crc,16)]
+                            cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+                            print(cashlessVendRequest)
+                            print(cashlessVendSuccess)
+                            break
+                elif len(precioHex) == 6:
+                    if f == 2:
+                        numHex= "0x"+i
+
+                    elif f == 3:
+                        numHex2= numHex+i
+
+                    elif f == 4:
+                        numHex3= "0x"+i
+
+                    elif f == 5:
+                        numHex4= numHex3+i
+                        print(numHex2 +" "+numHex4+" "+posicionHex)
+                        crc = hex(from_hex("0x13") + from_hex("0x05") + from_hex(numHex2) + from_hex(numHex4) + from_hex(posicionHex))
+                        crc2 = hex(from_hex("0x13") + from_hex("0x02") + from_hex(posicionHex))
+                        if len(crc)==5 or len(crc)==6:
+                            c=0
+                            for j in crc:
+                                if len(crc)==5 and c==3:
+                                    numCrc = "0x" + j
+                                elif len(crc)==5 and c==4:
+                                    crc = numCrc + j
+                                    print("crc: "+crc)
+                                    cashlessVendRequest = [0x13,0x05,int(numHex2,16),int(numHex4,16),0x00,
+                                                           int(posicionHex,16),int(crc,16)]
+                                    cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+                                    print(cashlessVendRequest)
+                                    print(cashlessVendSuccess)
+                                    break
+                                elif len(crc)==6 and c==4:
+                                    numCrc = "0x" + j
+                                elif len(crc)==6 and c==5:
+                                    crc = numCrc + j
+                                    print("crc: "+crc+" y el precio:" + numHex2 +","+numHex4 + " posicion: "
+                                          +posicionHex)
+                                    cashlessVendRequest = [0x13,0x05,int(numHex2,16),int(numHex4,16),0x00,
+                                                           int(posicionHex,16),int(crc,16)]
+                                    cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+                                    print(cashlessVendRequest)
+                                    print(cashlessVendSuccess)
+                                    break
+                                c += 1
+                        else:
+                            print("crc: "+crc+" y el precio:" + numHex2 +","+numHex4 + " posicion: "+posicionHex)
+                            cashlessVendRequest = [0x13,0x05,int(numHex2,16),int(numHex4,16),0x00,
+                                                   int(posicionHex,16),int(crc,16)]
+                            cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+                            print(cashlessVendRequest)
+                            print(cashlessVendSuccess)
+                            break
+                f += 1
+
         else:
 
-            ejecutarComandos.vendCancel(ejecucionVenta)
-            ejecutarComandos.resetDevice(ejecucionVenta)
-            ejecutarComandos.pollDevice(ejecucionVenta)
-            ejecutarComandos.disableDevice(ejecucionVenta)
-            respuestaCashLess = "venta_denegada"
-            return respuestaCashLess
-
-        ejecucionVenta = ejecutarComandos.cierraSerial(ser)
-
-    def activarReset(self):
-
-        # The window will stay open until this function call ends.
-
-        # Define variables y se ejecutan
-
-        ejecucionVenta = ejecutarComandos.serialSet(ser)
-
-        ejecutarComandos.disableDevice(ejecucionVenta)
-        ejecutarComandos.pollDevice(ejecucionVenta)
-        ejecutarComandos.resetDevice(ejecucionVenta)
-
-        ejecucionVenta = ejecutarComandos.cierraSerial(ser)
+            crc = hex(from_hex("0x13") + from_hex("0x05") + from_hex(precioHex) + from_hex(posicionHex))
+            crc2 = hex(from_hex("0x13") + from_hex("0x02") + from_hex(posicionHex))
+            cashlessVendRequest = [0x13,0x05,0x00,int(precioHex,16),0x00,int(posicionHex,16),int(crc,16)]
+            cashlessVendSuccess = [0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+            print(cashlessVendRequest)
+            print(cashlessVendSuccess)
+        return (cashlessVendRequest,cashlessVendSuccess)
 
 
+    ###################################################
+    # Defino configuracion del serial del controlador #
+    ###################################################
 
-async def response(websocket, path):
+    #variablesHex.ingresoValores
+    def serialSet(ser):
 
-    message = await websocket.recv()
-    print("Message client: " + message)
-    dividirPP = str(message).split(".")
+        ports = serial.tools.list_ports.comports(include_links=False)
+        portSer = None
+        for port in ports:
+            print(port.device)
+            portSer = port.device
 
-    productoCanal = dividirPP[0]
-    precioCanal = dividirPP[1]
-    metodoPago = dividirPP[2]
+        ser.baudrate = 115200
+        ser.port = portSer
+        ser.parity = 'N'
+        ser.bytesize = 8
+        ser.stopbits = 1
+        ser.rtscts = True
+        ser.timeout = 0
+        ser.xonxoff = False
+        ser.open()
+        return (ser)
 
-    messageResp = servidorSOPAX.generarVenta(self, productoCanal, precioCanal, metodoPago)
+        #########################
+        #Definicion de comandos##
+        #########################
 
-    await websocket.send("I can confirm I got your message is: " + messageResp)
-    print("Send Message")
+        cashlessCashSale = [0x13, 0x05, 0x00, 0x01, 0x00, 0x01, 0x16]
 
-start_server = websockets.serve(response, 'localhost', 8080)
+    #################################
+    #################################
+    # #Envio parametros al datafono #
+    #################################
+    #################################
 
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
+    def resetDevice(ser):
+
+        cashlessReset = [0x10, 0x10]
+        ser.write(cashlessReset)
+
+        #######################
+        #Respuesta del datafono
+        #######################
+
+        time.sleep(2) #tiempo de respuesta
+        read_Reset = ser.read(size=128)
+        print("Reset: " + str(read_Reset))
+
+
+    def disableDevice(ser):
+
+        cashlessDisable = [0x14, 0x00, 0x14]
+        ser.write(cashlessDisable)
+
+        #######################
+        #Respuesta del datafono
+        #######################
+
+        time.sleep(2)
+        read_Disable = ser.read(size=128)
+        print("Disable: " + str(read_Disable))
+
+
+    def enableDevice(ser):
+
+        cashlessEnable = [0x14, 0x01, 0x15]
+        ser.write(cashlessEnable)
+
+        #######################
+        #Respuesta del datafono
+        #######################
+
+        time.sleep(1)
+        read_Enable = ser.read(size=128)
+
+
+        ##### verificar si se activa el enable
+        while True:
+
+            ser.write(cashlessEnable)
+            read_Enable = str(ser.read(size=128))
+            print("Enable: " + str(read_Enable))
+            time.sleep(1)
+            if read_Enable != "b''":
+                if read_Enable[5] == str(0):
+                    print("Enable: " + str(read_Enable))
+                    return True
+
+        print("Enable: " + str(read_Enable))
+        #return False
+        #return True
+
+    def pollEnableDevice(ser): #este metodo es para comprobar que llega un 03 (begin idle)
+
+        cashlessPoll = [0x12, 0x12]
+        ser.write(cashlessPoll)
+
+        #######################
+        #Respuesta del datafono
+        #######################
+
+        read_Poll = ser.read(size=128)
+        print("Poll: " + str(read_Poll))
+        read_PollStr = str(read_Poll)
+        # tEnable = 0
+        while read_PollStr == "b''" or read_PollStr[5] == str(0):
+
+            ser.write(cashlessPoll)
+            read_Poll = ser.read(size=128)
+            read_PollStr = str(read_Poll)
+            print("Poll: " + str(read_Poll))
+            time.sleep(1)
+            if read_PollStr != "b''":
+                if read_PollStr[5] == str(3):
+                    break
+                    # return False
+            #     elif tEnable == 2:
+            #         return True
+            #         break
+            # tEnable += 1
+
+    def pollDeviceVendRequest(ser):
+
+        cashlessPoll = [0x12, 0x12]
+        ser.write(cashlessPoll)
+
+        #######################
+        #Respuesta del datafono
+        #######################
+
+        # time.sleep(2)
+        # read_Poll = ser.read(size=128)
+        # print("Poll: " + str(read_Poll))
+
+        ser.write(cashlessPoll)
+
+        while True:
+
+            time.sleep(1)
+            ser.write(cashlessPoll)
+            read_Poll = ser.read(size=128)
+            read_PollStr = str(read_Poll)
+            print("Poll: " + str(read_Poll))
+            if read_PollStr != "b''" or read_PollStr != "'b\'\''":
+                if read_PollStr[5] == str(5):
+                    return True
+                elif read_PollStr[5] == str(6) or read_PollStr[5] == str(6):
+                    return False
+
+    def pollDevice(ser):
+
+        cashlessPoll = [0x12, 0x12]
+        ser.write(cashlessPoll)
+
+        #######################
+        #Respuesta del datafono
+        #######################
+
+        time.sleep(2)
+        read_Poll = ser.read(size=128)
+        print("Poll: " + str(read_Poll))
+
+        ser.write(cashlessPoll)
+
+
+    def vendRequest(ser,cashlessVendRequest):
+
+        ser.write(cashlessVendRequest)
+
+        #######################
+        #Respuesta del datafono
+        #######################
+
+        time.sleep(2)
+        read_VendRequest = ser.read(size=128)
+        print("VendRequest: " + str(read_VendRequest))
+        time.sleep(2)
+
+    def vendRequestCash(ser,cashlessVendRequest):
+
+        ser.write(cashlessVendRequest)
+
+        #######################
+        #Respuesta del datafono
+        #######################
+
+        time.sleep(2)
+        read_VendRequest = ser.read(size=128)
+        print("VendRequest: " + str(read_VendRequest))
+        time.sleep(2)
+
+    def vendSuccess(ser, cashlessVendSuccess):
+
+        ser.write(cashlessVendSuccess)
+
+        #######################
+        #Respuesta del datafono
+        #######################
+
+        time.sleep(2)
+        read_VendSuccess = ser.read(size=128)
+        print("VendSuccess: " + str(read_VendSuccess))
+
+
+    def vendCancel(ser):
+
+        cashlessVendCancel = [0x13, 0x01, 0x14]
+        ser.write(cashlessVendCancel)
+
+        #######################
+        #Respuesta del datafono
+        #######################
+
+        time.sleep(2)
+        read_VendCancel = ser.read(size=128)
+        print("VendSuccess: " + str(read_VendCancel))
+
+
+    ###############
+    #Cierra serial#
+    ###############
+
+    def cierraSerial(ser):
+
+        ser.close()
+        return (ser)
