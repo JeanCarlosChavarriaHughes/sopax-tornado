@@ -1,0 +1,6 @@
+// Abrir puerto en ubuntu
+sudo su
+//type your password
+cd /
+cd dev
+chown username ttyUSB0
