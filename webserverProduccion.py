@@ -1,4 +1,5 @@
 import asyncio
+import json
 import websockets
 from pruebaAccionador import ejecutarComandos
 import serial
@@ -28,14 +29,14 @@ class servidorSOPAX(object):
 
         # The window will stay open until this function call ends.
 
-        if (producto == "Producto 1"):
-            producto = 12
+        if (producto == "imagineing.com"):
+            producto = 10
         elif (producto == "Producto 2"):
             producto = 25
         elif (producto == "Producto 3"):
             producto = 36
 
-        if medioPago == "Efectivo":
+        if medioPago == "01":
             medioPago = 2
             respuestaGV = servidorSOPAX.ejecutarDatafonoCash(self, producto, monto)
             return respuestaGV
@@ -76,6 +77,7 @@ class servidorSOPAX(object):
             ejecutarComandos.disableDevice(ejecucionVenta)
             ejecutarComandos.resetDevice(ejecucionVenta)
             respuestaCashLess = "venta_aprobada"
+            ejecucionVenta = ejecutarComandos.cierraSerial(ser)
             return respuestaCashLess
         else:
 
@@ -84,9 +86,10 @@ class servidorSOPAX(object):
             ejecutarComandos.pollDevice(ejecucionVenta)
             ejecutarComandos.disableDevice(ejecucionVenta)
             respuestaCashLess = "venta_denegada"
+            ejecucionVenta = ejecutarComandos.cierraSerial(ser)
             return respuestaCashLess
 
-        ejecucionVenta = ejecutarComandos.cierraSerial(ser)
+        #ejecucionVenta = ejecutarComandos.cierraSerial(ser)
 
     def activarReset(self):
 
@@ -108,11 +111,18 @@ async def response(websocket, path):
 
     message = await websocket.recv()
     print("Message client: " + message)
-    dividirPP = str(message).split(".")
 
-    productoCanal = dividirPP[0]
-    precioCanal = dividirPP[1]
-    metodoPago = dividirPP[2]
+    respJSON = json.loads(message)
+
+    #dividirPP = str(message).split(".")
+
+    #productoCanal = dividirPP[0]
+    #precioCanal = dividirPP[1]
+    #metodoPago = dividirPP[2]
+
+    productoCanal = respJSON["name"]
+    precioCanal = respJSON["price"]
+    metodoPago = respJSON["medio"]
 
     messageResp = servidorSOPAX.generarVenta(self, productoCanal, precioCanal, metodoPago)
 
