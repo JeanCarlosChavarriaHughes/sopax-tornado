@@ -4,6 +4,7 @@ import websockets
 from pruebaAccionador import ejecutarComandos
 import serial
 import time
+import tkinter as tk
 
 cashlessVendRequest = 0
 cashlessVendSuccess = 0
@@ -114,7 +115,7 @@ async def response(websocket, path):
 
     respJSON = json.loads(message)
 
-    #dividirPP = str(message).split(".")
+    #dividirPP = str(message).split(",")
 
     #productoCanal = dividirPP[0]
     #precioCanal = dividirPP[1]
@@ -129,7 +130,28 @@ async def response(websocket, path):
     await websocket.send("I can confirm I got your message is: " + messageResp)
     print("Send Message")
 
-start_server = websockets.serve(response, 'localhost', 8080)
+fields = "Direccion ip:"
 
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
+def show_entry_fields():
+
+    ingreso_ip = str(e1.get())
+    print(ingreso_ip)
+    master.destroy()
+    start_server = websockets.serve(response, ingreso_ip, 8080)
+    asyncio.get_event_loop().run_until_complete(start_server)
+    asyncio.get_event_loop().run_forever()
+
+master = tk.Tk()
+
+tk.Label(master,
+         text=fields).grid(row=0)
+e1 = tk.Entry(master)
+e1.grid(row=0, column=1)
+tk.Button(master,
+          text='OK', command=show_entry_fields).grid(row=3,
+                                                       column=1,
+                                                       sticky=tk.W,
+                                                       pady=4)
+
+
+tk.mainloop()
