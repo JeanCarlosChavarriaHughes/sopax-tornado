@@ -284,7 +284,8 @@ class ejecutarComandos(object):
     def serialSet(ser):
 
         ports = serial.tools.list_ports.comports(include_links=False)
-        portSer = None
+        #portSer = None
+        
         for port in ports:
             print(port.device)
             portSer = port.device
