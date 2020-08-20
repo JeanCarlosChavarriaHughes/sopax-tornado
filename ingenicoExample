@@ -1,0 +1,73 @@
+import serial
+
+import time
+
+import serial.tools.list_ports
+
+
+
+### PRUEBA DE DATAFONO CON NAYAX PRIMERA FASE #####
+
+self1= serial.Serial()
+
+#def serialSet(self):
+
+ports = serial.tools.list_ports.comports(include_links=False)
+
+portSer = None
+
+for port in ports:
+
+    print(port.device)
+
+    portSer = port.device
+
+self1.baudrate = 115200
+
+self1.port = portSer
+
+self1.parity = 'N'
+
+self1.bytesize = 8
+
+self1.stopbits = 1
+
+self1.rtscts = True
+
+self1.timeout = 0
+
+self1.xonxoff = False
+
+self1.open()
+
+cR = [0x02,0x00,0x35,0x36,0x30,0x30,0x30,0x30,0x30,0x30,0x30,0x30,0x30,0x31,0x30,0x32,0x30,0x20,0x20,0x30,0x1C,0x34,
+      0x30,0x00,0x12,0x30,0x30,0x30,0x30,0x30,0x30,0x30,0x30,0x32,0x35,0x30,0x30,0x1C,0x03,0x12]
+
+self1.write(cR)
+
+time.sleep(2)
+
+read_Reset = self1.read(size=128)
+
+print(read_Reset)
+
+time.sleep(15)
+
+read_Reset = self1.read(size=128)
+
+print(read_Reset)
+
+self1.close()
+
+    #return (self)
+
+
+
+
+#serialSet(self)
+
+
+
+
+
+
