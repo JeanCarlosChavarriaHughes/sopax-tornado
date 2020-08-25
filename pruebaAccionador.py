@@ -284,8 +284,7 @@ class ejecutarComandos(object):
     def serialSet(ser):
 
         ports = serial.tools.list_ports.comports(include_links=False)
-        #portSer = None
-        
+        portSer = None
         for port in ports:
             print(port.device)
             portSer = port.device
@@ -298,7 +297,11 @@ class ejecutarComandos(object):
         ser.rtscts = True
         ser.timeout = 0
         ser.xonxoff = False
-        ser.open()
+        try:
+            ser.open()
+        except Exception:
+            return False
+
         return (ser)
 
         #########################
@@ -504,3 +507,4 @@ class ejecutarComandos(object):
 
         ser.close()
         return (ser)
+    
