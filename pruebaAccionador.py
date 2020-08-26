@@ -137,10 +137,42 @@ class ejecutarComandos(object):
 
             crc = hex(from_hex("0x13") + from_hex(precioHex) + from_hex(posicionHex))
             crc2 = hex(from_hex("0x13") + from_hex("0x02") + from_hex(posicionHex))
-            cashlessVendRequest = [0x13,0x00,0x00,int(precioHex,16),0x00,int(posicionHex,16),int(crc,16)]
-            cashlessVendSuccess = [0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
-            print(cashlessVendRequest)
-            print(cashlessVendSuccess)
+
+            if len(crc)==5 or len(crc)==6:
+                c=0
+                for j in crc:
+                    if len(crc)==5 and c==3:
+                        numCrc = "0x" + j
+                    elif len(crc)==5 and c==4:
+                        crc = numCrc + j
+                        #print("crc: "+crc+" y el precio:" + numHex +","+numHex3 + " posicion: "
+                        #      +posicionHex)
+                        cashlessVendRequest = [0x13,0x00,0x00,int(precioHex,16),0x00,int(posicionHex,16),
+                                               int(crc,16)]
+                        cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+                        print(cashlessVendRequest)
+                        print(cashlessVendSuccess)
+                        break
+                    elif len(crc)==6 and c==4:
+                        numCrc = "0x" + j
+                    elif len(crc)==6 and c==5:
+                        crc = numCrc + j
+                        #print("crc: "+crc +" y el precio:" + numHex +","+numHex3 + " posicion: "
+                        #      +posicionHex)
+                        cashlessVendRequest = [0x13,0x00,0x00,int(precioHex,16),0x00,int(posicionHex,16),
+                                               int(crc,16)]
+                        cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+                        print(cashlessVendRequest)
+                        print(cashlessVendSuccess)
+                        break
+                    c += 1
+            else:
+
+                cashlessVendRequest = [0x13,0x00,0x00,int(precioHex,16),0x00,int(posicionHex,16),int(crc,16)]
+                cashlessVendSuccess = [0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+                print(cashlessVendRequest)
+                print(cashlessVendSuccess)
+
         return (cashlessVendRequest,cashlessVendSuccess)
 
     def ingresoValoresCash(posicion, precio):
@@ -269,10 +301,40 @@ class ejecutarComandos(object):
 
             crc = hex(from_hex("0x13") + from_hex("0x05") + from_hex(precioHex) + from_hex(posicionHex))
             crc2 = hex(from_hex("0x13") + from_hex("0x02") + from_hex(posicionHex))
-            cashlessVendRequest = [0x13,0x05,0x00,int(precioHex,16),0x00,int(posicionHex,16),int(crc,16)]
-            cashlessVendSuccess = [0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
-            print(cashlessVendRequest)
-            print(cashlessVendSuccess)
+
+            if len(crc)==5 or len(crc)==6:
+                c=0
+                for j in crc:
+                    if len(crc)==5 and c==3:
+                        numCrc = "0x" + j
+                    elif len(crc)==5 and c==4:
+                        crc = numCrc + j
+                        #print("crc: "+crc+" y el precio:" + from_hex(precioHex) +","+numHex3 + " posicion: "
+                        #      +posicionHex)
+                        cashlessVendRequest = [0x13,0x05,0x00,int(precioHex,16),0x00,int(posicionHex,16)
+                            ,int(crc,16)]
+                        cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+                        print(cashlessVendRequest)
+                        print(cashlessVendSuccess)
+                        break
+                    elif len(crc)==6 and c==4:
+                        numCrc = "0x" + j
+                    elif len(crc)==6 and c==5:
+                        crc = numCrc + j
+                        #print("crc: "+crc +" y el precio:" + numHex +","+numHex3 + " posicion: "
+                        #      +posicionHex)
+                        cashlessVendRequest = [0x13,0x05,0x00,int(precioHex,16),0x00,int(posicionHex,16),
+                                               int(crc,16)]
+                        cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+                        print(cashlessVendRequest)
+                        print(cashlessVendSuccess)
+                        break
+                    c += 1
+            else:
+                cashlessVendRequest = [0x13,0x05,0x00,int(precioHex,16),0x00,int(posicionHex,16),int(crc,16)]
+                cashlessVendSuccess = [0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+                print(cashlessVendRequest)
+                print(cashlessVendSuccess)
         return (cashlessVendRequest,cashlessVendSuccess)
 
 
@@ -507,4 +569,3 @@ class ejecutarComandos(object):
 
         ser.close()
         return (ser)
-    
