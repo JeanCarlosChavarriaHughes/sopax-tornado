@@ -1,14 +1,10 @@
 import asyncio
 import json
-import socket
-
 import websockets
 from pruebaAccionador import ejecutarComandos
+from condicionInicial import EnableThread
 import serial
 import time
-import os
-
-
 import tkinter as tk
 
 cashlessVendRequest = 0
@@ -16,11 +12,12 @@ cashlessVendSuccess = 0
 ser = serial.Serial()
 self = None
 
+pruebaEnable = 0
+prueba = EnableThread(sleep_interval=1)
+
 class servidorSOPAX(object):
 
     def activarDatafonoServidor(self):
-
-        # The window will stay open until this function call ends.
 
         activarSerial = ejecutarComandos.serialSet(ser)
         ejecutarComandos.resetDevice(activarSerial)
@@ -32,8 +29,6 @@ class servidorSOPAX(object):
         ejecutarComandos.cierraSerial(activarSerial)
 
     def generarVenta(self, producto, monto, medioPago):
-
-        # The window will stay open until this function call ends.
 
         if (producto == "imagineing.com"):
             producto = 10
@@ -62,7 +57,11 @@ class servidorSOPAX(object):
             ejecutarComandos.vendRequestCash(ejecucionVenta,variablesProducto[0])
             ejecutarComandos.disableDevice(ejecucionVenta)
             ejecutarComandos.resetDevice(ejecucionVenta)
-            ejecucionVenta = ejecutarComandos.cierraSerial(ser)
+            ejecutarComandos.cierraSerial(ser)
+
+            prueba = EnableThread(sleep_interval=1)
+            prueba.start()
+
             respuestaCash = "efectivo_aceptado"
 
         return respuestaCash
@@ -91,8 +90,12 @@ class servidorSOPAX(object):
                 ejecutarComandos.pollDevice(ejecucionVenta)
                 ejecutarComandos.disableDevice(ejecucionVenta)
                 ejecutarComandos.resetDevice(ejecucionVenta)
+                ejecutarComandos.cierraSerial(ser)
+
+                prueba = EnableThread(sleep_interval=1)
+                prueba.start()
+
                 respuestaCashLess = "venta_aprobada"
-                ejecucionVenta = ejecutarComandos.cierraSerial(ser)
                 return respuestaCashLess
 
             else:
@@ -101,14 +104,15 @@ class servidorSOPAX(object):
                 ejecutarComandos.resetDevice(ejecucionVenta)
                 ejecutarComandos.pollDevice(ejecucionVenta)
                 ejecutarComandos.disableDevice(ejecucionVenta)
+                ejecutarComandos.cierraSerial(ser)
+
+                prueba = EnableThread(sleep_interval=1)
+                prueba.start()
+
                 respuestaCashLess = "venta_denegada"
-                ejecucionVenta = ejecutarComandos.cierraSerial(ser)
                 return respuestaCashLess
 
     def activarReset(self):
-
-        # The window will stay open until this function call ends.
-
         # Define variables y se ejecutan
 
         ejecucionVenta = ejecutarComandos.serialSet(ser)
@@ -116,10 +120,10 @@ class servidorSOPAX(object):
         ejecutarComandos.disableDevice(ejecucionVenta)
         ejecutarComandos.pollDevice(ejecucionVenta)
         ejecutarComandos.resetDevice(ejecucionVenta)
+        ejecutarComandos.cierraSerial(ser)
 
-        ejecucionVenta = ejecutarComandos.cierraSerial(ser)
-
-
+        prueba = EnableThread(sleep_interval=1)
+        prueba.start()
 
 async def response(websocket, path):
 
@@ -128,23 +132,19 @@ async def response(websocket, path):
 
     respJSON = json.loads(message)
 
-    #dividirPP = str(message).split(",")
-
-    #productoCanal = dividirPP[0]
-    #precioCanal = dividirPP[1]
-    #metodoPago = dividirPP[2]
-
     productoCanal = respJSON["name"]
     precioCanal = respJSON["price"]
     metodoPago = respJSON["medio"]
 
+    prueba.kill()
+
     messageResp = servidorSOPAX.generarVenta(self, productoCanal, precioCanal, metodoPago)
 
     await websocket.send("I can confirm I got your message is: " + messageResp)
-    print("Send Message")
-
+    print(messageResp)
 
 fields = "Direccion ip:"
+
 
 def show_entry_fields():
 
@@ -156,6 +156,9 @@ def show_entry_fields():
     asyncio.get_event_loop().run_until_complete(start_server)
     asyncio.get_event_loop().run_forever()
 
+#Procesos de arranca sistema
+
+prueba.start()
 
 show_entry_fields() # inicializa ingreso ip automatico
 
