@@ -137,42 +137,10 @@ class ejecutarComandos(object):
 
             crc = hex(from_hex("0x13") + from_hex(precioHex) + from_hex(posicionHex))
             crc2 = hex(from_hex("0x13") + from_hex("0x02") + from_hex(posicionHex))
-
-            if len(crc)==5 or len(crc)==6:
-                c=0
-                for j in crc:
-                    if len(crc)==5 and c==3:
-                        numCrc = "0x" + j
-                    elif len(crc)==5 and c==4:
-                        crc = numCrc + j
-                        #print("crc: "+crc+" y el precio:" + numHex +","+numHex3 + " posicion: "
-                        #      +posicionHex)
-                        cashlessVendRequest = [0x13,0x00,0x00,int(precioHex,16),0x00,int(posicionHex,16),
-                                               int(crc,16)]
-                        cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
-                        print(cashlessVendRequest)
-                        print(cashlessVendSuccess)
-                        break
-                    elif len(crc)==6 and c==4:
-                        numCrc = "0x" + j
-                    elif len(crc)==6 and c==5:
-                        crc = numCrc + j
-                        #print("crc: "+crc +" y el precio:" + numHex +","+numHex3 + " posicion: "
-                        #      +posicionHex)
-                        cashlessVendRequest = [0x13,0x00,0x00,int(precioHex,16),0x00,int(posicionHex,16),
-                                               int(crc,16)]
-                        cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
-                        print(cashlessVendRequest)
-                        print(cashlessVendSuccess)
-                        break
-                    c += 1
-            else:
-
-                cashlessVendRequest = [0x13,0x00,0x00,int(precioHex,16),0x00,int(posicionHex,16),int(crc,16)]
-                cashlessVendSuccess = [0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
-                print(cashlessVendRequest)
-                print(cashlessVendSuccess)
-
+            cashlessVendRequest = [0x13,0x00,0x00,int(precioHex,16),0x00,int(posicionHex,16),int(crc,16)]
+            cashlessVendSuccess = [0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+            print(cashlessVendRequest)
+            print(cashlessVendSuccess)
         return (cashlessVendRequest,cashlessVendSuccess)
 
     def ingresoValoresCash(posicion, precio):
@@ -301,40 +269,10 @@ class ejecutarComandos(object):
 
             crc = hex(from_hex("0x13") + from_hex("0x05") + from_hex(precioHex) + from_hex(posicionHex))
             crc2 = hex(from_hex("0x13") + from_hex("0x02") + from_hex(posicionHex))
-
-            if len(crc)==5 or len(crc)==6:
-                c=0
-                for j in crc:
-                    if len(crc)==5 and c==3:
-                        numCrc = "0x" + j
-                    elif len(crc)==5 and c==4:
-                        crc = numCrc + j
-                        #print("crc: "+crc+" y el precio:" + from_hex(precioHex) +","+numHex3 + " posicion: "
-                        #      +posicionHex)
-                        cashlessVendRequest = [0x13,0x05,0x00,int(precioHex,16),0x00,int(posicionHex,16)
-                            ,int(crc,16)]
-                        cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
-                        print(cashlessVendRequest)
-                        print(cashlessVendSuccess)
-                        break
-                    elif len(crc)==6 and c==4:
-                        numCrc = "0x" + j
-                    elif len(crc)==6 and c==5:
-                        crc = numCrc + j
-                        #print("crc: "+crc +" y el precio:" + numHex +","+numHex3 + " posicion: "
-                        #      +posicionHex)
-                        cashlessVendRequest = [0x13,0x05,0x00,int(precioHex,16),0x00,int(posicionHex,16),
-                                               int(crc,16)]
-                        cashlessVendSuccess=[0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
-                        print(cashlessVendRequest)
-                        print(cashlessVendSuccess)
-                        break
-                    c += 1
-            else:
-                cashlessVendRequest = [0x13,0x05,0x00,int(precioHex,16),0x00,int(posicionHex,16),int(crc,16)]
-                cashlessVendSuccess = [0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
-                print(cashlessVendRequest)
-                print(cashlessVendSuccess)
+            cashlessVendRequest = [0x13,0x05,0x00,int(precioHex,16),0x00,int(posicionHex,16),int(crc,16)]
+            cashlessVendSuccess = [0x13,0x02,0x00,int(posicionHex,16),int(crc2,16)]
+            print(cashlessVendRequest)
+            print(cashlessVendSuccess)
         return (cashlessVendRequest,cashlessVendSuccess)
 
 
@@ -350,6 +288,33 @@ class ejecutarComandos(object):
         for port in ports:
             print(port.device)
             portSer = port.device
+
+        ser.baudrate = 115200
+        ser.port = portSer
+        ser.parity = 'N'
+        ser.bytesize = 8
+        ser.stopbits = 1
+        ser.rtscts = True
+        ser.timeout = 0
+        ser.xonxoff = False
+        try:
+            ser.open()
+        except Exception:
+            return False
+
+        return (ser)
+
+    #variablesHex ingresoValores CondicionesIniciales
+    def serialSetInicial(ser):
+
+        while True: #conectarse a puerto serial
+            ports = serial.tools.list_ports.comports(include_links=False)
+            portSer = None
+            for port in ports:
+                print(port.device)
+                portSer = port.device
+            if portSer != None:
+                break
 
         ser.baudrate = 115200
         ser.port = portSer
@@ -560,6 +525,17 @@ class ejecutarComandos(object):
         read_VendCancel = ser.read(size=128)
         print("VendSuccess: " + str(read_VendCancel))
 
+    def alwaysEnable(ser):
+
+        cashlessReset = [0x10, 0x10]
+        ser.write(cashlessReset)
+        time.sleep(1)
+        cashlessDisable = [0x14,0x00,0x14]
+        ser.write(cashlessDisable)
+        time.sleep(1)
+        cashlessEnable = [0x14,0x01,0x15]
+        ser.write(cashlessEnable)
+        time.sleep(240)
 
     ###############
     #Cierra serial#
