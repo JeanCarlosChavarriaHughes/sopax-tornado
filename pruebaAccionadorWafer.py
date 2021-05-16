@@ -317,7 +317,8 @@ class ejecutarComandos(object):
                 break
 
         ser.baudrate = 9600
-        ser.port = portSer
+        if str(portSer) == "/dev/ttyUSB0" 
+            ser.port = portSer
         ser.parity = 'N'
         ser.bytesize = 8
         ser.stopbits = 1
