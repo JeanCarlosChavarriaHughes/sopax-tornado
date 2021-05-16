@@ -285,11 +285,11 @@ class ejecutarComandos(object):
 
         ports = serial.tools.list_ports.comports(include_links=False)
         portSer = None
-        for port in ports:
-            print(port.device)
-            if str(portSer) == "/dev/ttyUSB0": #este caso es para RPI
-                portSer = port.device
-                break
+        
+        portSer = ports[0].device
+        #for port in ports:
+            #print(port.device)
+            #portSer = port.device
 
         ser.baudrate = 9600
         ser.port = portSer #importante se debe cambiar en RPI por /dev/ttyUSB0
@@ -312,11 +312,14 @@ class ejecutarComandos(object):
         while True: #conectarse a puerto serial
             ports = serial.tools.list_ports.comports(include_links=False)
             portSer = None
-            for port in ports:
-                print(port.device)
-                portSer = port.device
-            if portSer != None:
-                break
+            
+            portSer = ports[0].device
+            print(port.device)
+            #for port in ports:
+             #   print(port.device)
+             #   portSer = port.device
+            #if portSer != None:
+             #   break
 
         ser.baudrate = 9600         
         ser.port = portSer 
