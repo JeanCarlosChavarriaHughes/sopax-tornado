@@ -292,7 +292,7 @@ class ejecutarComandos(object):
             #portSer = port.device
 
         ser.baudrate = 9600
-        ser.port = portSer #importante se debe cambiar en RPI por /dev/ttyUSB0
+        ser.port = portSer #importante se debe cambiar en RPI por '/dev/ttyUSB0' literlamente entre comillas simples
         ser.parity = 'N'
         ser.bytesize = 8
         ser.stopbits = 1
