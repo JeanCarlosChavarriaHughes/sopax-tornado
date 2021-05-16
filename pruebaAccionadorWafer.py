@@ -289,6 +289,7 @@ class ejecutarComandos(object):
             print(port.device)
             if str(portSer) == "/dev/ttyUSB0": #este caso es para RPI
                 portSer = port.device
+                break
 
         ser.baudrate = 9600
         ser.port = portSer #importante se debe cambiar en RPI por /dev/ttyUSB0
