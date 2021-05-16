@@ -422,11 +422,11 @@ class ejecutarComandos(object):
         while True:
 
             ser.write(cashlessVendRequest)
-            time.sleep(1)
+            time.sleep(3)
             read_Poll = ser.read(size=128)
             read_PollStr = str(read_Poll)
             print("VendRequest: " + str(read_Poll))
-            time.sleep(1)
+            time.sleep(4)
             if read_PollStr != "b''":
                 if read_PollStr.__contains__("05"):
                     return True
